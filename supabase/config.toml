@@ -1,0 +1,34 @@
+project_id = "bcadcdukmcaimiuwzxna"
+
+[functions.spark-generate]
+verify_jwt = false
+
+[functions.chase-pitch]
+verify_jwt = false
+
+[functions.buzz-generate]
+verify_jwt = false
+
+[functions.send-team-invite]
+verify_jwt = false
+
+[functions.spark-visual]
+verify_jwt = false
+
+[functions.spark-studio]
+verify_jwt = false
+
+[functions.send-certificate]
+verify_jwt = false
+
+[functions.reg-ai-assist]
+verify_jwt = false
+
+[functions.send-registration-confirmation]
+verify_jwt = false
+
+[functions.qr-check-in]
+verify_jwt = false
+
+[functions.send-announcement]
+verify_jwt = false

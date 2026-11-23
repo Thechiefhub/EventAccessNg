@@ -1,0 +1,239 @@
+import { useState, useMemo } from "react";
+import { Search, QrCode, UserCheck, Undo2, X, ChevronDown, ChevronUp, Filter } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Attendee } from "@/hooks/useAttendees";
+
+interface Props {
+  attendees: Attendee[];
+  eventId?: string;
+  onCheckIn: (id: string) => Promise<boolean>;
+  onUndoCheckIn: (id: string) => Promise<void>;
+}
+
+export default function CheckInInterface({ attendees, eventId, onCheckIn, onUndoCheckIn }: Props) {
+  const [query, setQuery] = useState("");
+  const [lastCheckedIn, setLastCheckedIn] = useState<Attendee | null>(null);
+  const [showAll, setShowAll] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(30);
+  const [statusFilter, setStatusFilter] = useState<"all" | "checked_in" | "not_checked_in">("all");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+
+  // Get unique roles
+  const uniqueRoles = useMemo(() => {
+    const roles = new Set(attendees.map((a) => a.role || "attendee"));
+    return Array.from(roles).sort();
+  }, [attendees]);
+
+  const isSearching = query.trim().length >= 2;
+
+  const applyFilters = (list: Attendee[]) => {
+    let filtered = list;
+    if (statusFilter === "checked_in") filtered = filtered.filter((a) => a.checked_in);
+    if (statusFilter === "not_checked_in") filtered = filtered.filter((a) => !a.checked_in);
+    if (roleFilter !== "all") filtered = filtered.filter((a) => (a.role || "attendee") === roleFilter);
+    return filtered;
+  };
+
+  const searchResults = isSearching
+    ? applyFilters(attendees.filter(
+        (a) =>
+          a.name.toLowerCase().includes(query.toLowerCase()) ||
+          (a.email && a.email.toLowerCase().includes(query.toLowerCase())) ||
+          (a.phone && a.phone.includes(query)) ||
+          (a.ticket_id && a.ticket_id.toLowerCase().includes(query.toLowerCase()))
+      ))
+    : [];
+
+  // Sort: unchecked first, then by name
+  const sortedAttendees = useMemo(() => {
+    return applyFilters([...attendees]).sort((a, b) => {
+      if (a.checked_in !== b.checked_in) return a.checked_in ? 1 : -1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [attendees, statusFilter, roleFilter]);
+
+  const displayList = isSearching ? searchResults : sortedAttendees.slice(0, visibleCount);
+  const hasMore = !isSearching && visibleCount < sortedAttendees.length;
+
+  const handleCheckIn = async (attendee: Attendee) => {
+    const ok = await onCheckIn(attendee.id);
+    if (ok) {
+      setLastCheckedIn({ ...attendee, checked_in: true });
+      setQuery("");
+    }
+  };
+
+  const checkedInCount = attendees.filter(a => a.checked_in).length;
+
+  const renderAttendeeCard = (a: Attendee) => (
+    <Card key={a.id} className="border-border">
+      <CardContent className="p-3 flex items-center justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-10 w-10 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+            {a.name.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium text-foreground truncate">{a.name}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {a.email || a.phone || a.role || "attendee"}
+              <span className="ml-1.5 font-medium text-primary">
+                · Admit {a.admits}
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {a.checked_in ? (
+            <>
+              <Badge variant="secondary" className="bg-[hsl(var(--earth-green)/0.15)] text-[hsl(var(--earth-green))]">
+                Checked In
+              </Badge>
+              <Button variant="ghost" size="icon" onClick={() => onUndoCheckIn(a.id)} title="Undo">
+                <Undo2 className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button size="sm" onClick={() => handleCheckIn(a)} className="gradient-sunset text-primary-foreground">
+              Check In
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Success Banner */}
+      {lastCheckedIn && (
+        <Card className="border-[hsl(var(--earth-green))] bg-[hsl(var(--earth-green)/0.1)]">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <UserCheck className="h-8 w-8 text-[hsl(var(--earth-green))]" />
+              <div>
+                <p className="font-display font-bold text-foreground">{lastCheckedIn.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  ✓ Checked in · Admit {lastCheckedIn.admits}
+                </p>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setLastCheckedIn(null)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search by name, email, phone, or ticket ID..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="pl-10 h-12 text-base"
+          autoFocus
+        />
+      </div>
+
+      {/* QR scanning lives in one place — the full-screen verified scanner */}
+      {eventId && (
+        <Button asChild className="w-full gradient-sunset text-primary-foreground">
+          <Link to={`/scan/${eventId}`}>
+            <QrCode className="h-4 w-4 mr-2" /> Scan QR Code
+          </Link>
+        </Button>
+      )}
+
+      {/* Filters */}
+      {attendees.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+            <SelectTrigger className="w-36 h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="not_checked_in">Not Checked In</SelectItem>
+              <SelectItem value="checked_in">Checked In</SelectItem>
+            </SelectContent>
+          </Select>
+          {uniqueRoles.length > 1 && (
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger className="w-32 h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                {uniqueRoles.map((r) => (
+                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {(statusFilter !== "all" || roleFilter !== "all") && (
+            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setStatusFilter("all"); setRoleFilter("all"); }}>
+              Clear
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Attendee List Header */}
+      {!isSearching && attendees.length > 0 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground font-medium">
+            {sortedAttendees.length === attendees.length
+              ? <>All Attendees ({attendees.length}) · <span className="text-[hsl(var(--earth-green))]">{checkedInCount} checked in</span></>
+              : <>{sortedAttendees.length} of {attendees.length} attendees (filtered)</>
+            }
+          </p>
+          <Button variant="ghost" size="sm" onClick={() => setShowAll(!showAll)} className="text-xs">
+            {showAll ? <><ChevronUp className="h-3 w-3 mr-1" /> Collapse</> : <><ChevronDown className="h-3 w-3 mr-1" /> Expand</>}
+          </Button>
+        </div>
+      )}
+
+      {/* Search Results or Full Attendee List */}
+      {isSearching && searchResults.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">{searchResults.length} result(s)</p>
+          {searchResults.map(renderAttendeeCard)}
+        </div>
+      )}
+
+      {isSearching && searchResults.length === 0 && (
+        <p className="text-center text-muted-foreground py-8">No attendees found for "{query}"</p>
+      )}
+
+      {!isSearching && showAll && attendees.length > 0 && (
+        <div className="space-y-2">
+          {displayList.map(renderAttendeeCard)}
+          {hasMore && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setVisibleCount((c) => c + 30)}
+            >
+              Load more ({sortedAttendees.length - visibleCount} remaining)
+            </Button>
+          )}
+        </div>
+      )}
+
+      {attendees.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <UserCheck className="h-12 w-12 mx-auto mb-3 opacity-30" />
+          <p className="font-display">No attendees uploaded yet</p>
+          <p className="text-sm mt-1">Upload attendees in the Attendees tab first</p>
+        </div>
+      )}
+    </div>
+  );
+}

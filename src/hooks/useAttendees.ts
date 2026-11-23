@@ -1,0 +1,244 @@
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
+export interface Attendee {
+  id: string;
+  event_id: string;
+  user_id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role: string | null;
+  ticket_id: string | null;
+  checked_in: boolean;
+  checked_in_at: string | null;
+  checked_in_by: string | null;
+  certificate_url: string | null;
+  admits: number;
+  certificate_sent_at: string | null;
+  check_in_notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+const OFFLINE_QUEUE_KEY = "dday_checkin_queue";
+const OFFLINE_CACHE_KEY = "dday_attendee_cache";
+
+export function useAttendees(eventId: string, eventData?: { name: string; event_date?: string | null; city?: string | null; country?: string | null }) {
+  const { user } = useAuth();
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAttendees = useCallback(async () => {
+    if (!eventId || !user) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("attendees")
+      .select("*")
+      .eq("event_id", eventId)
+      .order("name");
+    if (error) {
+      toast.error("Failed to load attendees");
+    } else {
+      setAttendees(data || []);
+      // Cache for offline use
+      try {
+        localStorage.setItem(`${OFFLINE_CACHE_KEY}_${eventId}`, JSON.stringify(data));
+      } catch {}
+    }
+    setLoading(false);
+  }, [eventId, user]);
+
+  useEffect(() => {
+    fetchAttendees();
+  }, [fetchAttendees]);
+
+  // Realtime subscription
+  useEffect(() => {
+    if (!eventId) return;
+    const channel = supabase
+      .channel(`attendees-${eventId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "attendees", filter: `event_id=eq.${eventId}` },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setAttendees((prev) => [...prev, payload.new as Attendee]);
+          } else if (payload.eventType === "UPDATE") {
+            setAttendees((prev) =>
+              prev.map((a) => (a.id === (payload.new as Attendee).id ? (payload.new as Attendee) : a))
+            );
+          } else if (payload.eventType === "DELETE") {
+            setAttendees((prev) => prev.filter((a) => a.id !== (payload.old as any).id));
+          }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [eventId]);
+
+  // Check-in function with offline queue
+  const checkIn = useCallback(async (attendeeId: string, notes?: string) => {
+    if (!user) return false;
+    const now = new Date().toISOString();
+    // Prevent duplicate check-ins (client-side guard)
+    const existing = attendees.find((a) => a.id === attendeeId);
+    if (existing?.checked_in) {
+      toast.info(`${existing.name} is already checked in`);
+      return false;
+    }
+    const trimmedNotes = notes?.trim() ? notes.trim().slice(0, 280) : null;
+    // Optimistic update
+    setAttendees((prev) =>
+      prev.map((a) =>
+        a.id === attendeeId ? { ...a, checked_in: true, checked_in_at: now, checked_in_by: user.id, check_in_notes: trimmedNotes } : a
+      )
+    );
+    // Atomic update — only succeeds if not already checked in
+    const { data: updated, error } = await supabase
+      .from("attendees")
+      .update({ checked_in: true, checked_in_at: now, checked_in_by: user.id, check_in_notes: trimmedNotes })
+      .eq("id", attendeeId)
+      .eq("checked_in", false)
+      .select("id");
+    if (error) {
+      // Queue for offline sync
+      try {
+        const queue = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || "[]");
+        queue.push({ attendeeId, checkedInAt: now, checkedInBy: user.id });
+        localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+      } catch {}
+      toast.error("Check-in queued — will sync when online");
+      return false;
+    }
+    if (!updated || updated.length === 0) {
+      toast.info("Already checked in");
+      return false;
+    }
+    toast.success("Checked in!");
+
+    // Trigger certificate generation (fire-and-forget)
+    const attendee = attendees.find((a) => a.id === attendeeId);
+    if (attendee && attendee.email && !attendee.certificate_sent_at) {
+      const certId = `CERT-${attendeeId.slice(0, 8).toUpperCase()}-${Date.now()}`;
+      const location = [eventData?.city, eventData?.country].filter(Boolean).join(", ");
+
+      // Load certificate settings
+      let certMode = "auto";
+      let customTemplateUrl: string | null = null;
+      let namePosition = { x: 50, y: 50 };
+      try {
+        const raw = localStorage.getItem(`cert_settings_${eventId}`);
+        if (raw) {
+          const s = JSON.parse(raw);
+          if (s.mode) certMode = s.mode;
+          if (s.templateUrl) customTemplateUrl = s.templateUrl;
+          if (s.namePosition) namePosition = s.namePosition;
+        }
+      } catch {}
+
+      supabase.functions.invoke("send-certificate", {
+        body: {
+          attendeeId,
+          attendeeName: attendee.name,
+          attendeeEmail: attendee.email,
+          eventName: eventData?.name || "Event",
+          eventDate: eventData?.event_date || null,
+          eventLocation: location || null,
+          certificateId: certId,
+          certMode,
+          customTemplateUrl,
+          namePosition,
+        },
+      }).then(({ error: certError }) => {
+        if (certError) {
+          console.warn("Certificate generation failed:", certError);
+        } else {
+          toast.success(`Certificate sent to ${attendee.email}`);
+        }
+      });
+    }
+
+    return true;
+  }, [user, attendees, eventData]);
+
+  const undoCheckIn = useCallback(async (attendeeId: string) => {
+    setAttendees((prev) =>
+      prev.map((a) =>
+        a.id === attendeeId ? { ...a, checked_in: false, checked_in_at: null, checked_in_by: null } : a
+      )
+    );
+    await supabase.from("attendees").update({ checked_in: false, checked_in_at: null, checked_in_by: null }).eq("id", attendeeId);
+  }, []);
+
+  // Generate ticket IDs for attendees missing them
+  const generateMissingTicketIds = useCallback(async () => {
+    const missing = attendees.filter((a) => !a.ticket_id);
+    if (missing.length === 0) { toast.info("All attendees already have ticket IDs"); return; }
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const genCode = () => {
+      let code = "";
+      for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+      return `TKT-${code}`;
+    };
+    // Guarantee uniqueness across every pass on this event, even for 1000+ badges.
+    const used = new Set(attendees.map((a) => a.ticket_id).filter(Boolean) as string[]);
+    let failed = 0;
+    for (const a of missing) {
+      let saved = false;
+      for (let attempt = 0; attempt < 6 && !saved; attempt++) {
+        let ticket_id = genCode();
+        while (used.has(ticket_id)) ticket_id = genCode();
+        // The DB unique index (event_id, ticket_id) is the final arbiter —
+        // a collision returns an error and we retry with a fresh code.
+        const { error } = await supabase.from("attendees").update({ ticket_id }).eq("id", a.id);
+        if (!error) { used.add(ticket_id); saved = true; }
+      }
+      if (!saved) failed += 1;
+    }
+    if (failed > 0) toast.error(`${failed} ticket ID(s) could not be generated — try again`);
+    toast.success(`Generated ${missing.length - failed} unique ticket ID(s)`);
+    fetchAttendees();
+  }, [attendees, fetchAttendees]);
+
+  // Sync offline queue
+  const syncOfflineQueue = useCallback(async () => {
+    if (!user) return;
+    try {
+      const queue = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || "[]");
+      if (queue.length === 0) return;
+      for (const item of queue) {
+        await supabase.from("attendees").update({
+          checked_in: true,
+          checked_in_at: item.checkedInAt,
+          checked_in_by: item.checkedInBy,
+        }).eq("id", item.attendeeId);
+      }
+      localStorage.removeItem(OFFLINE_QUEUE_KEY);
+      toast.success(`Synced ${queue.length} offline check-in(s)`);
+      fetchAttendees();
+    } catch {}
+  }, [user, fetchAttendees]);
+
+  useEffect(() => {
+    const handleOnline = () => syncOfflineQueue();
+    window.addEventListener("online", handleOnline);
+    // Try sync on mount too
+    syncOfflineQueue();
+    return () => window.removeEventListener("online", handleOnline);
+  }, [syncOfflineQueue]);
+
+  // Load from cache if offline
+  useEffect(() => {
+    if (!navigator.onLine && eventId) {
+      try {
+        const cached = localStorage.getItem(`${OFFLINE_CACHE_KEY}_${eventId}`);
+        if (cached) setAttendees(JSON.parse(cached));
+      } catch {}
+    }
+  }, [eventId]);
+
+  return { attendees, loading, fetchAttendees, checkIn, undoCheckIn, setAttendees, generateMissingTicketIds };
+}

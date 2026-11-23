@@ -1,0 +1,198 @@
+/**
+ * The D-Day Module — Attendance & Check-in System
+ *
+ * USER GUIDE:
+ * 1. Select your event from the dropdown at the top.
+ * 2. ATTENDEES tab: Upload a CSV/Excel file with your guest list. Map columns to name, email, phone, etc.
+ * 3. CHECK-IN tab: Search attendees by name/email/phone or scan QR codes to check them in.
+ * 4. DASHBOARD tab: View live stats — total registered, checked-in, remaining, and a recent check-in feed.
+ * 5. TEAM tab: Invite team members by email. Admins get full access; Staff can only check in.
+ * 6. Export: Download a CSV of all checked-in attendees from the Attendees tab.
+ *
+ * Offline: The check-in interface caches attendees locally. If you lose connection,
+ * check-ins are queued and synced automatically when back online.
+ *
+ * Real-time: All stats update live across all logged-in team members via WebSockets.
+ */
+
+import { CalendarCheck, UserCheck, Users, Shield, QrCode, Award, Trash2, Loader2, Megaphone, ScanLine } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useEventSelect } from "@/hooks/useEventSelect";
+import { useAttendees } from "@/hooks/useAttendees";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { useState } from "react";
+import DDayDashboard from "@/components/dday/DDayDashboard";
+import CheckInInterface from "@/components/dday/CheckInInterface";
+import AttendeeUpload from "@/components/dday/AttendeeUpload";
+import TeamManager from "@/components/dday/TeamManager";
+import BadgeGenerator from "@/components/dday/BadgeGenerator";
+import CertificateSettings from "@/components/dday/CertificateSettings";
+import AnnouncementBroadcaster from "@/components/dday/AnnouncementBroadcaster";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
+export default function DDayModule() {
+  const { user } = useAuth();
+  const { events, selectedEventId, setSelectedEventId, loading: eventsLoading } = useEventSelect();
+  const selectedEvent = events.find((e) => e.id === selectedEventId);
+  const { attendees, loading: attendeesLoading, fetchAttendees, checkIn, undoCheckIn, generateMissingTicketIds } = useAttendees(selectedEventId, selectedEvent ? { name: selectedEvent.name, event_date: selectedEvent.event_date, city: selectedEvent.city, country: selectedEvent.country } : undefined);
+
+  // Event owner is always admin
+  const isAdmin = !!user && events.some((e) => e.id === selectedEventId);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDeleteEvent = async (eventId: string, eventName: string) => {
+    setDeletingId(eventId);
+    try {
+      const { error } = await supabase.from("events").delete().eq("id", eventId);
+      if (error) throw error;
+      toast.success(`"${eventName}" deleted.`);
+      // If we deleted the selected event, the hook will auto-select another
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete event.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  if (eventsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (events.length === 0) {
+    return (
+      <div className="p-6 text-center">
+        <CalendarCheck className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-40" />
+        <p className="font-display text-lg text-foreground">No events yet</p>
+        <p className="text-sm text-muted-foreground mt-1">Create an event first to manage attendance.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="flex items-center gap-2">
+          <CalendarCheck className="h-6 w-6 text-primary" />
+          <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">The D‑Day</h1>
+        </div>
+        <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+          <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue placeholder="Select event" />
+            </SelectTrigger>
+            <SelectContent>
+              {events.map((ev) => (
+                <SelectItem key={ev.id} value={ev.id}>{ev.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {isAdmin && selectedEvent && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0">
+                  {deletingId === selectedEventId ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete "{selectedEvent.name}"?</AlertDialogTitle>
+                  <AlertDialogDescription>This will permanently remove this event and all its attendees, team members, and related data. This cannot be undone.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => handleDeleteEvent(selectedEvent.id, selectedEvent.name)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          {selectedEvent && (
+            <Button asChild size="sm" className="gradient-sunset text-primary-foreground shrink-0">
+              <Link to={`/scan/${selectedEvent.id}`}><ScanLine className="mr-1 h-4 w-4" />Scan</Link>
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="dashboard" className="w-full">
+        <div className="relative -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="flex w-full justify-start gap-2 overflow-x-auto overflow-y-hidden scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden h-auto p-1.5 rounded-2xl sm:grid sm:grid-cols-7 sm:gap-1">
+            {[
+              { v: "dashboard", label: "Dashboard", Icon: Users },
+              { v: "checkin", label: "Check-In", Icon: UserCheck },
+              { v: "attendees", label: "Attendees", Icon: Users },
+              { v: "badges", label: "Badges", Icon: QrCode },
+              { v: "certificates", label: "Certs", Icon: Award },
+              { v: "announce", label: "Announce", Icon: Megaphone },
+              { v: "team", label: "Team", Icon: Shield },
+            ].map(({ v, label, Icon }) => (
+              <TabsTrigger
+                key={v}
+                value={v}
+                className="shrink-0 snap-start rounded-xl px-4 py-2 text-xs sm:text-sm font-medium transition-all data-[state=active]:gradient-sunset data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg sm:shrink sm:px-2"
+              >
+                <Icon className="h-4 w-4 mr-1.5" /> {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent sm:hidden" />
+        </div>
+
+        <TabsContent value="dashboard" className="mt-4">
+          <DDayDashboard attendees={attendees} isAdmin={isAdmin} onCheckIn={checkIn} onUndoCheckIn={undoCheckIn} />
+        </TabsContent>
+
+        <TabsContent value="checkin" className="mt-4">
+          <CheckInInterface attendees={attendees} eventId={selectedEventId} onCheckIn={checkIn} onUndoCheckIn={undoCheckIn} />
+        </TabsContent>
+
+        <TabsContent value="attendees" className="mt-4">
+          <AttendeeUpload eventId={selectedEventId} attendees={attendees} onUploaded={fetchAttendees} />
+        </TabsContent>
+
+        <TabsContent value="badges" className="mt-4">
+          <BadgeGenerator
+            eventId={selectedEventId}
+            attendees={attendees}
+            eventName={events.find((e) => e.id === selectedEventId)?.name || ""}
+            onGenerateMissingIds={generateMissingTicketIds}
+          />
+        </TabsContent>
+
+        <TabsContent value="certificates" className="mt-4">
+          <CertificateSettings
+            eventId={selectedEventId}
+            eventName={selectedEvent?.name || ""}
+            eventDate={selectedEvent?.event_date}
+            eventLocation={[selectedEvent?.city, selectedEvent?.country].filter(Boolean).join(", ") || null}
+            attendees={attendees}
+          />
+        </TabsContent>
+
+        <TabsContent value="announce" className="mt-4">
+          <AnnouncementBroadcaster
+            eventId={selectedEventId}
+            eventName={selectedEvent?.name || ""}
+            attendees={attendees}
+          />
+        </TabsContent>
+
+        <TabsContent value="team" className="mt-4">
+          <TeamManager eventId={selectedEventId} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

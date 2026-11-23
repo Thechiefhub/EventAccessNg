@@ -1,0 +1,242 @@
+/* ==========================================================================
+   Myevent Homepage Theme Tokens — "Afro-Futurist Neon on Off-Black"
+   Swap colours or fonts here to re-skin the entire homepage in one place.
+   ========================================================================== */
+
+:root {
+  /* Core canvas (Dark default) */
+  --bg-primary: #0A0A0A;      /* deep off-black, not pure #000 */
+  --bg-secondary: #F5F0E6;    /* warm cream for light sections */
+  --bg-tertiary: #141414;     /* card surfaces on dark */
+
+  /* Hero & Module accents */
+  --accent-lime: #C8FF00;     /* electric acid green — primary CTA + highlights */
+  --accent-violet: #6C1EF5;   /* electric violet — gradients, hover states */
+  --accent-coral: #FF5C5C;    /* hot coral — badges, alerts, fun moments */
+  --accent-sun: #FFB800;      /* golden yellow — awards/countdown vibes */
+
+  /* Neutrals */
+  --text-primary: #F5F0E6;
+  --text-on-light: #0A0A0A;
+  --text-muted: #A1A1A1;
+  --text-muted-light: #525252;
+  --border-subtle: #262626;
+  --border-light: #DDD6C8;
+  --border-pop: #C8FF00;
+
+  /* Theme-aware contrast helpers (guarantees lime text never sits on cream) */
+  --accent-on-primary: #C8FF00;
+  --accent-on-primary-soft: rgba(200, 255, 0, 0.14);
+  --accent-on-primary-text: #0A0A0A;
+  --contrast-on-secondary: #0A0A0A;
+  --contrast-on-secondary-inv: #F5F0E6;
+  --stat-accent-on-secondary: #C8FF00;
+
+  /* Font stacks */
+  --font-clash: 'Clash Display', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-cabinet: 'Cabinet Grotesk', 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  --font-satoshi: 'Satoshi', 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-editorial: 'Instrument Serif', Georgia, serif;
+
+  /* Spacing & motion tokens */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --nav-offset: 16px;
+}
+
+/* Light-mode variant for the homepage (swaps primary dark & secondary cream cleanly) */
+[data-myevent-theme="light"] {
+  --bg-primary: #F5F0E6;
+  --bg-secondary: #0A0A0A;
+  --bg-tertiary: #EAE3D5;
+  --text-primary: #0A0A0A;
+  --text-on-light: #F5F0E6;
+  --text-muted: #4A4A4A;
+  --text-muted-light: #A1A1A1;
+  --border-subtle: #D4CBB9;
+  --border-light: #262626;
+  --accent-on-primary: #6C1EF5;
+  --accent-on-primary-soft: rgba(108, 30, 245, 0.12);
+  --accent-on-primary-text: #F5F0E6;
+  --contrast-on-secondary: #F5F0E6;
+  --contrast-on-secondary-inv: #0A0A0A;
+  --stat-accent-on-secondary: #6C1EF5;
+}
+
+/* Typography helpers */
+.font-clash {
+  font-family: var(--font-clash);
+}
+
+.font-cabinet {
+  font-family: var(--font-cabinet);
+}
+
+.font-satoshi {
+  font-family: var(--font-satoshi);
+}
+
+.font-editorial {
+  font-family: var(--font-editorial);
+}
+
+/* Outlined (stroke-only) editorial display text */
+.text-stroke-lime {
+  -webkit-text-stroke: 2px var(--accent-lime);
+  color: transparent;
+}
+
+[data-myevent-theme="light"] .text-stroke-lime {
+  -webkit-text-stroke: 2px #0A0A0A;
+  color: var(--accent-lime);
+}
+
+.text-stroke-cream {
+  -webkit-text-stroke: 1.5px var(--text-primary);
+  color: transparent;
+}
+
+.text-stroke-watermark {
+  -webkit-text-stroke: 1.5px rgba(245, 240, 230, 0.08);
+  color: transparent;
+}
+
+/* Variable-feel weight shift on hero display text hover */
+.hero-weight-shift {
+  font-variation-settings: "wght" 700;
+  transition: font-variation-settings 220ms var(--ease-expo), letter-spacing 220ms var(--ease-expo), transform 220ms var(--ease-expo);
+}
+
+.hero-weight-shift:hover {
+  font-variation-settings: "wght" 600;
+  letter-spacing: -0.025em;
+}
+
+/* Keyboard accessible focus ring in electric lime */
+.myevent-focus:focus-visible {
+  outline: 2px solid var(--accent-lime);
+  outline-offset: 3px;
+}
+
+[data-myevent-theme="light"] .myevent-focus:focus-visible {
+  outline: 2px solid var(--accent-violet);
+  outline-offset: 3px;
+}
+
+/* Subtle animated underline draw on hover */
+.nav-underline {
+  position: relative;
+}
+
+.nav-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background-color: var(--accent-lime);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 200ms var(--ease-expo);
+}
+
+.nav-underline:hover::after,
+.nav-underline:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* 1% editorial film grain overlay via inline SVG feTurbulence */
+.editorial-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* Slow 20s ambient mesh gradient drift */
+@keyframes meshDrift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(32px, -24px, 0) scale(1.06);
+  }
+  66% {
+    transform: translate3d(-24px, 18px, 0) scale(0.96);
+  }
+}
+
+.animate-mesh-drift {
+  animation: meshDrift 20s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-mesh-drift-reverse {
+  animation: meshDrift 24s ease-in-out infinite reverse;
+  will-change: transform;
+}
+
+/* Editorial marquee strip (infinite seamless loop, pauses on hover) */
+@keyframes editorialMarquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-editorial-marquee {
+  display: flex;
+  width: max-content;
+  animation: editorialMarquee 26s linear infinite;
+  will-change: transform;
+}
+
+.marquee-wrapper:hover .animate-editorial-marquee,
+.marquee-wrapper:focus-within .animate-editorial-marquee {
+  animation-play-state: paused;
+}
+
+/* Confetti burst animation (one-time 2s award-show celebration) */
+@keyframes confettiBurst {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--rot)) scale(0.7);
+  }
+}
+
+.confetti-piece {
+  animation: confettiBurst 2s cubic-bezier(0.12, 0.85, 0.25, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Subtle horizontal scrollbar hide for mobile snap cards */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Respect prefers-reduced-motion strictly */
+@media (prefers-reduced-motion: reduce) {
+  .animate-mesh-drift,
+  .animate-mesh-drift-reverse,
+  .animate-editorial-marquee,
+  .confetti-piece {
+    animation: none !important;
+  }
+  .hero-weight-shift,
+  .nav-underline::after {
+    transition: none !important;
+  }
+}
