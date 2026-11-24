@@ -34,7 +34,7 @@ const footerColumns = [
       { label: "Organiser Stories", href: "#stories" },
       { label: "The Engine", to: "/dashboard/engine" },
       { label: "Registration Pages", to: "/dashboard/registration" },
-      { label: "Sign In", to: "/auth" },
+      { label: "Sign In", to: "/signin" },
     ],
   },
   {
@@ -100,30 +100,33 @@ export const Footer: React.FC<FooterProps> = ({
       id="footer-legal"
       className="relative overflow-hidden bg-[#0A0A0A] text-[#F5F0E6] pt-20 pb-10"
     >
-      {/* Giant outlined MYEVENT watermark across footer background at ~6% opacity */}
+      {/* Giant outlined CHECKING watermark across footer background at ~6% opacity */}
       <div
         aria-hidden="true"
         className="pointer-events-none select-none absolute inset-x-0 bottom-0 flex justify-center overflow-hidden leading-none"
       >
-        <span className="font-clash font-bold uppercase text-[20vw] tracking-[-0.04em] text-stroke-watermark translate-y-[18%] whitespace-nowrap">
-          MYEVENT
+        <span className="font-clash font-bold uppercase text-[18vw] tracking-[-0.04em] text-stroke-watermark translate-y-[18%] whitespace-nowrap">
+          CHECKING
         </span>
       </div>
 
       <div className="relative z-10 mx-auto max-w-[1320px] px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16 border-b border-[#262626]">
-          {/* Left: Wordmark + one-liner + flags + theme switcher */}
+          {/* Left: Wordmark + tagline + flags + theme switcher */}
           <div className="lg:col-span-4 space-y-4">
             <Link
               to="/"
-              className="myevent-focus inline-flex items-center gap-1.5 font-cabinet font-extrabold text-2xl tracking-tight text-[#F5F0E6]"
+              className="checking-focus inline-flex items-center gap-1.5 font-cabinet font-extrabold text-2xl uppercase tracking-[-0.03em] text-[#F5F0E6]"
             >
-              <span>Myevent</span>
-              <span className="w-2 h-2 rounded-full bg-[#C8FF00] translate-y-[2px]" aria-hidden="true" />
+              <span>CHECKING</span>
+              <span
+                className="checking-dot-pulse w-2.5 h-2.5 rounded-full bg-[#C8FF00]"
+                aria-hidden="true"
+              />
             </Link>
             <p className="font-satoshi text-[15px] leading-relaxed text-[#A1A1A1] max-w-xs">
-              The AI event co-pilot for African conferences, summits, festivals, and
-              award nights.
+              Your event co-pilot. Built for African conferences, summits, festivals,
+              and award nights.
             </p>
             <div className="flex items-center gap-2 text-lg pt-1" aria-label="Operating across Nigeria, Kenya, Ghana, South Africa, Rwanda">
               <span>🇳🇬</span>
@@ -133,12 +136,12 @@ export const Footer: React.FC<FooterProps> = ({
               <span>🇷🇼</span>
             </div>
 
-            {/* Respect prefers-color-scheme + explicit theme switcher */}
+            {/* Explicit dark/light canvas switcher */}
             <div className="pt-2">
               <button
                 type="button"
                 onClick={onToggleTheme}
-                className="myevent-focus inline-flex items-center gap-2 rounded-full border border-[#262626] bg-[#141414] hover:border-[#C8FF00] px-4 py-2 min-h-[44px] font-satoshi text-xs font-medium text-[#F5F0E6] transition-colors"
+                className="checking-focus inline-flex items-center gap-2 rounded-full border border-[#262626] bg-[#141414] hover:border-[#C8FF00] px-4 py-2 min-h-[44px] font-satoshi text-xs font-medium text-[#F5F0E6] transition-colors"
                 aria-label={`Switch homepage to ${theme === "dark" ? "light" : "dark"} mode`}
               >
                 {theme === "dark" ? (
@@ -169,7 +172,7 @@ export const Footer: React.FC<FooterProps> = ({
                       {"to" in item && item.to ? (
                         <Link
                           to={item.to}
-                          className="myevent-focus hover:text-[#F5F0E6] transition-colors py-0.5 inline-block"
+                          className="checking-focus hover:text-[#F5F0E6] transition-colors py-0.5 inline-block"
                         >
                           {item.label}
                         </Link>
@@ -177,14 +180,14 @@ export const Footer: React.FC<FooterProps> = ({
                         <button
                           type="button"
                           onClick={item.action === "pricing" ? onOpenPricing : onOpenDemo}
-                          className="myevent-focus hover:text-[#F5F0E6] transition-colors py-0.5 text-left"
+                          className="checking-focus hover:text-[#F5F0E6] transition-colors py-0.5 text-left"
                         >
                           {item.label}
                         </button>
                       ) : (
                         <a
                           href={item.href}
-                          className="myevent-focus hover:text-[#F5F0E6] transition-colors py-0.5 inline-block"
+                          className="checking-focus hover:text-[#F5F0E6] transition-colors py-0.5 inline-block"
                         >
                           {item.label}
                         </a>
@@ -209,7 +212,7 @@ export const Footer: React.FC<FooterProps> = ({
                   target="_blank"
                   rel="noreferrer"
                   aria-label={s.name}
-                  className="myevent-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#F5F0E6]/25 text-[#F5F0E6] hover:bg-[#C8FF00] hover:border-[#C8FF00] hover:text-[#0A0A0A] hover:scale-105 transition-all duration-150"
+                  className="checking-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#F5F0E6]/25 text-[#F5F0E6] hover:bg-[#C8FF00] hover:border-[#C8FF00] hover:text-[#0A0A0A] hover:scale-105 transition-all duration-150"
                 >
                   {s.icon}
                 </a>
@@ -221,9 +224,9 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Bottom row */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-satoshi text-sm text-[#A1A1A1]">
           <p className="font-medium text-[#F5F0E6]">
-            Made in Africa. Built for the world.
+            Made in Africa. Built for the world. Powered by Checking.
           </p>
-          <p className="text-xs text-[#A1A1A1]">© 2025 Myevent. All rights reserved.</p>
+          <p className="text-xs text-[#A1A1A1]">© 2025 Checking. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   SparkIcon,
   SparkBurstPattern,
@@ -11,6 +13,8 @@ import {
   DDayIcon,
   DDayBarcodePattern,
 } from "@/assets/patterns";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export interface ModuleCardProps {
   number: string;
@@ -41,7 +45,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
     <Link
       to={to}
       style={{ backgroundColor: bgColor, color: textColor }}
-      className="myevent-focus group relative flex flex-col justify-between overflow-hidden rounded-[1.5rem] p-7 sm:p-9 lg:p-11 min-h-[370px] sm:min-h-[420px] border-2 border-[#0A0A0A] transition-transform duration-200 ease-out hover:-translate-y-1.5"
+      className="module-reveal-card checking-focus group relative flex flex-col justify-between overflow-hidden rounded-[1.5rem] p-7 sm:p-9 lg:p-11 min-h-[370px] sm:min-h-[420px] border-2 border-[#0A0A0A] transition-transform duration-200 ease-out hover:-translate-y-1.5"
     >
       {/* Subtle darkener overlay on hover */}
       <div
@@ -187,8 +191,40 @@ const modulesData: ModuleCardProps[] = [
 ];
 
 export const ModulesSection: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced || !sectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        ".module-reveal-card",
+        { y: 52, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.72,
+          stagger: 0.12,
+          ease: "power3.out",
+          clearProps: "transform",
+          scrollTrigger: {
+            trigger: ".modules-grid-trigger",
+            start: "top 82%",
+            once: true,
+          },
+        }
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       id="modules"
       aria-labelledby="modules-heading"
       className="relative bg-[var(--bg-secondary)] text-[var(--text-on-light)] py-20 sm:py-28 lg:py-32"
@@ -212,8 +248,8 @@ export const ModulesSection: React.FC = () => {
           </p>
         </div>
 
-        {/* 2x2 Full-Bleed Colour Block Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-7">
+        {/* 2x2 Full-Bleed Colour Block Grid with GSAP ScrollTrigger reveal */}
+        <div className="modules-grid-trigger grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-7">
           {modulesData.map((mod) => (
             <ModuleCard key={mod.name} {...mod} />
           ))}

@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
       status: "invalid",
       reason: parsed.ticket
         ? "This badge was issued for a different event."
-        : "This QR code is not a valid EventPadi ticket.",
+        : "This QR code is not a valid Checking ticket.",
       tierCounts: await tierCounts(),
     });
   }

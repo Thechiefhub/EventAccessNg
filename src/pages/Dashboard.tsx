@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Lightbulb, Handshake, Megaphone, Settings, CalendarDays, CheckCircle2, Users, TrendingUp, Plus, MapPin, Trash2, Loader2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import NewEventDialog from "@/components/NewEventDialog";
+import { EventCountdownTimer } from "@/components/dashboard/EventCountdownTimer";
+import { showCheckingToast } from "@/components/auth";
 import { format, differenceInDays } from "date-fns";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
@@ -29,6 +31,8 @@ const quickActions = [
   { title: "View Checklist", desc: "Track logistics & tasks", icon: Settings, to: "/dashboard/engine", color: "gradient-indigo" },
 ];
 
+const WELCOME_CONFETTI_COLORS = ["#C8FF00", "#6C1EF5", "#FF5C5C", "#FFB800", "#F5F0E6"];
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
@@ -36,24 +40,65 @@ export default function Dashboard() {
   const [taskStats, setTaskStats] = useState({ done: 0, total: 0 });
   const [sponsorCount, setSponsorCount] = useState(0);
   const [postCount, setPostCount] = useState(0);
+  const [showWelcomeConfetti, setShowWelcomeConfetti] = useState(false);
+
+  const welcomeConfettiPieces = useMemo(
+    () =>
+      Array.from({ length: 28 }).map((_, i) => {
+        const angle = (i / 28) * Math.PI * 2;
+        const spread = 90 + ((i * 41) % 180);
+        return {
+          id: i,
+          tx: `${Math.round(Math.cos(angle) * spread)}px`,
+          ty: `${Math.round(Math.sin(angle) * spread - 30)}px`,
+          rot: `${(i % 2 === 0 ? 1 : -1) * (160 + i * 17)}deg`,
+          color: WELCOME_CONFETTI_COLORS[i % WELCOME_CONFETTI_COLORS.length],
+        };
+      }),
+    []
+  );
+
+  // Trigger one-time 1.5s welcome confetti burst right after new signup
+  useEffect(() => {
+    try {
+      if (window.sessionStorage.getItem("checking_welcome_confetti") === "1") {
+        window.sessionStorage.removeItem("checking_welcome_confetti");
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        showCheckingToast("Welcome to Checking! Let’s make your next event loud.", "success");
+        if (!reduced) {
+          setShowWelcomeConfetti(true);
+          const t = window.setTimeout(() => setShowWelcomeConfetti(false), 1600);
+          return () => window.clearTimeout(t);
+        }
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
 
   const fetchData = async () => {
     if (!user) return;
     setLoading(true);
 
-    const [eventsRes, tasksRes, sponsorsRes, postsRes] = await Promise.all([
-      supabase.from("events").select("id, name, event_date, city, country, event_type, progress").order("created_at", { ascending: false }),
-      supabase.from("checklist_items").select("is_completed"),
-      supabase.from("sponsor_contacts").select("id"),
-      supabase.from("content_posts").select("id"),
-    ]);
+    try {
+      const [eventsRes, tasksRes, sponsorsRes, postsRes] = await Promise.all([
+        supabase.from("events").select("id, name, event_date, city, country, event_type, progress").order("created_at", { ascending: false }),
+        supabase.from("checklist_items").select("is_completed"),
+        supabase.from("sponsor_contacts").select("id"),
+        supabase.from("content_posts").select("id"),
+      ]);
 
-    setEvents(eventsRes.data || []);
+      setEvents(eventsRes.data || []);
 
-    const tasks = tasksRes.data || [];
-    setTaskStats({ done: tasks.filter((t) => t.is_completed).length, total: tasks.length });
-    setSponsorCount(sponsorsRes.data?.length || 0);
-    setPostCount(postsRes.data?.length || 0);
+      const tasks = tasksRes.data || [];
+      setTaskStats({ done: tasks.filter((t) => t.is_completed).length, total: tasks.length });
+      setSponsorCount(sponsorsRes.data?.length || 0);
+      setPostCount(postsRes.data?.length || 0);
+    } catch {
+      // Gracefully render empty workspace when offline
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -83,17 +128,46 @@ export default function Dashboard() {
     }
   };
 
-  const nextEvent = events.find((e) => e.event_date && new Date(e.event_date) >= new Date());
-
   return (
-    <div className="p-6 md:p-8 space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="relative p-6 md:p-8 space-y-8">
+      {/* One-time post-signup welcome confetti burst (1.5s) */}
+      {showWelcomeConfetti && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 z-50 overflow-hidden"
+        >
+          {welcomeConfettiPieces.map((p) => (
+            <span
+              key={p.id}
+              className="confetti-piece absolute left-1/2 top-28 w-2.5 h-2 rounded-[2px]"
+              style={
+                {
+                  backgroundColor: p.color,
+                  animationDuration: "1.5s",
+                  "--tx": p.tx,
+                  "--ty": p.ty,
+                  "--rot": p.rot,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">Welcome back! 👋</h1>
-          <p className="text-muted-foreground mt-1">Here's your event planning overview.</p>
+          <h1 className="font-cabinet text-2xl md:text-3xl font-extrabold text-foreground">
+            Welcome back to Checking
+          </h1>
+          <p className="text-muted-foreground mt-1 font-satoshi">
+            Your event planning command centre.
+          </p>
         </div>
         <NewEventDialog onCreated={fetchData} />
       </div>
+
+      {/* Dynamic Award-Show Energy Event Countdown Timer */}
+      <EventCountdownTimer events={events} />
 
       {/* Stats */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
@@ -104,7 +178,7 @@ export default function Dashboard() {
                 <s.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-display font-bold text-foreground">{s.value}</p>
+                <p className="text-2xl font-display font-bold text-foreground tabular-nums">{s.value}</p>
                 <p className="text-xs text-muted-foreground">{s.label}</p>
               </div>
             </CardContent>

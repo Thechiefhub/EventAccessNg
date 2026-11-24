@@ -1,31 +1,28 @@
-# Myevent — Editorial Afro-Futurist Homepage
+# Checking — Your Event Co-Pilot
 
-The rebuilt **Myevent** landing page pairs editorial brutalism with African festival/award-show energy — engineered to feel bold enough for a 24-year-old organiser in Lagos and credible enough for corporate banking sponsors.
+**Checking** is an AI-powered event co-pilot built for African organisers across Lagos, Nairobi, Accra, Johannesburg, and Kigali — uniting editorial brutalism with festival and award-show energy across the landing page, authentication suite, and organiser dashboard.
 
 ---
 
-## 1. Typography System & CDN Links
+## 1. Brand Identity & Typography System
 
-All fonts are loaded via `<link>` tags with `display=swap` and `preconnect` in `index.html` for fast 3G mobile rendering, with graceful fallbacks to prevent Cumulative Layout Shift (CLS).
+- **Wordmark:** `CHECKING` in **Cabinet Grotesk 800** uppercase with a pulsing electric lime dot (`#C8FF00`).
+- **Logo Mark / Favicon:** `public/checking-logo.svg` — minimal ticket stub with a checkmark cutout in `#0A0A0A` and `#C8FF00`.
+
+All fonts load with `display=swap` and `preconnect` in `index.html`:
 
 | Role | Font Family | Fallback | CDN |
 | :--- | :--- | :--- | :--- |
-| **Hero Display** | **Clash Display** (400–700) | Space Grotesk, system-ui | [Fontshare Clash Display](https://fontshare.com/fonts/clash-display) |
-| **Section Display** | **Cabinet Grotesk** (300–900) | Bricolage Grotesque, system-ui | [Fontshare Cabinet Grotesk](https://fontshare.com/fonts/cabinet-grotesk) |
+| **Hero & Countdown Display** | **Clash Display** (400–700) | Space Grotesk, system-ui | [Fontshare Clash Display](https://fontshare.com/fonts/clash-display) |
+| **Section & Wordmark Display** | **Cabinet Grotesk** (300–900) | Bricolage Grotesque, system-ui | [Fontshare Cabinet Grotesk](https://fontshare.com/fonts/cabinet-grotesk) |
 | **Body & UI** | **Satoshi** (400–700) | DM Sans, system-ui | [Fontshare Satoshi](https://fontshare.com/fonts/satoshi) |
 | **Pull Quotes / Editorial Accent** | **Instrument Serif Italic** | Georgia, serif | [Google Fonts Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif) |
-
-Tailwind font utilities exposed in `tailwind.config.ts`:
-- `font-clash`
-- `font-cabinet`
-- `font-satoshi`
-- `font-editorial`
 
 ---
 
 ## 2. Colour System & Theme Swapping
 
-All homepage design tokens live in **`src/theme.css`** (imported at the top of `src/index.css`) and are mapped to Tailwind tokens in `tailwind.config.ts`.
+Core design tokens live in **`src/theme.css`** and auth-specific tokens live in **`src/auth-theme.css`** (both imported at the top of `src/index.css`).
 
 ```css
 :root {
@@ -49,43 +46,53 @@ All homepage design tokens live in **`src/theme.css`** (imported at the top of `
 ```
 
 ### How to Edit or Swap the Theme
-1. Open **`src/theme.css`**.
-2. Change any hex colour in `:root` (dark default) or `[data-myevent-theme="light"]` (cream canvas light variant).
-3. Update font stacks via `--font-clash`, `--font-cabinet`, `--font-satoshi`, and `--font-editorial`.
-4. Users can also switch between Off-Black and Cream canvases directly via the footer theme toggle.
+1. Open **`src/theme.css`** (or **`src/auth-theme.css`** for auth surfaces).
+2. Edit tokens in `:root` (default off-black) or `[data-checking-theme="light"]` (cream canvas).
+3. Users can also toggle between Off-Black and Cream canvases directly via the homepage footer toggle.
 
 ---
 
-## 3. Motion Library & Interaction Budget
+## 3. Motion & Highlights
 
-- **Library:** `framer-motion` + pure CSS compositor animations (`transform` and `opacity` only).
-- **4 Signature Motion Moments:**
-  1. Hero line-by-line slide-up (`80ms` stagger) + interactive 3D module card stack spread on hover/tap.
-  2. Module cards' `6px` lift hover, subtle darkening overlay, and `45°` rotating arrow button.
-  3. Scroll-linked travelling lime dot down the **How it Works** vertical timeline (`useScroll` + `IntersectionObserver`).
-  4. One-time scroll-triggered 2s CSS confetti burst in the **Award-Show Moment** section.
-- **Marquee Strip:** Infinite horizontal marquee that pauses cleanly on hover/focus.
-- **Accessibility:** Full `prefers-reduced-motion` support disables non-essential motion in both CSS (`src/theme.css`) and React (`useReducedMotion()`). All interactive controls include keyboard-visible focus rings (`.myevent-focus`) and mobile tap targets `>= 44×44px`.
+- **GSAP + ScrollTrigger (Four Modules):** `src/components/home/ModuleCard.tsx` uses `gsap` with `ScrollTrigger` to smoothly slide and fade in the four module blocks (`Spark`, `Chase`, `Buzz`, `D-Day`) as they scroll into view, with `prefers-reduced-motion` protection and cleanup via `gsap.context()`.
+- **Framer Motion + CSS Compositor Motion:** Hero headline stagger, interactive 3D module card stack, vertical dotted-lime timeline progress, and one-time Award-Show scroll confetti burst.
+- **Dynamic Event Countdown Timer (Dashboard):** `src/components/dashboard/EventCountdownTimer.tsx` reads the active/upcoming event's `event_date` and displays live Days, Hours, Minutes, and Seconds in **Clash Display** with electric lime (`#C8FF00`) accents and event switching.
 
 ---
 
-## 4. Component & Asset Architecture
+## 4. Authentication Architecture & Endpoints
 
-### Homepage Sections (`src/components/home/`)
-1. `Navbar.tsx` — Floating pill navbar with scroll contraction and full-screen staggered mobile menu.
-2. `Hero.tsx` — Asymmetric hero with Clash Display headline, outlined `AFRICA`, animated mesh blobs, and interactive 4-module stack.
-3. `Marquee.tsx` — Cream editorial marquee strip with Adinkra diamond separators.
-4. `ModuleCard.tsx` — Full-bleed colour block cards for **Spark**, **Chase**, **Buzz**, and **D-Day**.
-5. `HowItWorks.tsx` — Vertical dotted-lime timeline (desktop) and horizontal snap cards (mobile).
-6. `TestimonialCard.tsx` — Staggered masonry proof cards with Instrument Serif Italic quotes and hover tilt.
-7. `AwardMoment.tsx` — Full-bleed dark statement + scroll-triggered confetti burst.
-8. `FinalCTA.tsx` — Oversized cream CTA with Kente hairline divider.
-9. `Footer.tsx` — 4-column dark footer with giant outlined `MYEVENT` watermark and lime-fill social buttons.
-10. `HomeModals.tsx` — Interactive 60-second product tour, multi-currency pricing modal (`NGN` / `KES` / `USD`), and validated demo request form.
+Checking ships with a unified editorial split-screen auth experience (`55%` brand poster / `45%` form panel on desktop; compact top hero + `440px` form on mobile):
 
-### Decorative SVG Patterns (`src/assets/patterns/`)
-- `SparkPattern.tsx` — Hand-drawn spark/lightbulb icon & radiating spark burst corner SVG.
-- `ChasePattern.tsx` — Target icon & concentric Adinkra-inspired geometric target SVG.
-- `BuzzPattern.tsx` — Megaphone icon & frequency waveform corner SVG.
-- `DDayPattern.tsx` — Ticket stub checkmark icon & barcode stripes corner SVG.
-- `AdinkraAccents.tsx` — Nsoromma diamond separator, Adinkra micro-mark, and Kente stripe hairline accent.
+### Frontend Routes & Components
+- **Pages:** `/signup`, `/signin`, `/forgot-password`, `/check-email`, `/reset-password`, `/verify-email` (plus `/auth` redirecting to `/signin`).
+- **Reusable Primitives (`src/components/auth/`):** `AuthLayout`, `AuthBrandPanel`, `AuthCard`, `TextInput`, `PasswordInput` (with eye-blink toggle and 4-segment strength meter), searchable `Dropdown` (all 54 African countries defaulting to Nigeria + organiser role picker), `SocialLoginButton`, `PrimaryButton`, and `InlineError`.
+- **Storage Migration:** `src/lib/storageMigration.ts` automatically migrates legacy localStorage keys to `checking*` keys on first load.
+
+### Backend Auth API (`/api/auth/*` in `server/auth.ts`)
+- `POST /api/auth/signup` — Creates account with salted `scrypt` password hash, enforces password rules, issues `HttpOnly` session cookie + token, and dispatches Checking welcome + verification emails.
+- `POST /api/auth/signin` — Constant-time password verification, sliding-window rate limiting (5 attempts / 15 min), and optional 30-day "Remember me" session duration.
+- `POST /api/auth/forgot-password` — Always returns a generic success response to prevent account enumeration; creates a 30-minute single-use hashed reset token.
+- `GET /api/auth/reset-password/validate` & `POST /api/auth/reset-password` — Validates token expiry/single-use status and updates password.
+- `POST /api/auth/verify-email` & `POST /api/auth/resend-verification` — Marks account verified or re-sends verification email.
+- `GET /api/auth/me` & `POST /api/auth/signout` — Reads active session or clears the `HttpOnly` session cookie.
+- `GET /api/auth/oauth/:provider` (`google` | `apple`) — Ready for OAuth client credentials; returns a graceful notice until `GOOGLE_CLIENT_ID` / `APPLE_CLIENT_ID` are configured.
+
+### Email Templates (`server/emailTemplates.ts`)
+Branded Checking HTML templates (off-black header, `CHECKING` wordmark + lime dot, `#C8FF00` pill CTA, cream canvas, `"Powered by Checking – Your event co-pilot."`) for:
+1. Welcome
+2. Email verification
+3. Password reset
+4. D-Day team invitation
+5. Sponsor follow-up reminder
+
+---
+
+## 5. Environment Variables
+
+See `.env.example` for all supported variables:
+- `GEMINI_API_KEY` — Gemini API key for Spark, Buzz, Chase, and Engine AI Agenda planning.
+- `CHECKING_APP_URL` — Public base URL (e.g., `https://checking.app`).
+- `EMAIL_FROM` — Outbound sender address (defaults to `noreply@checking.app`).
+- `SENDGRID_API_KEY` — Optional SendGrid key to deliver transactional auth emails (falls back to structured server logging in development).
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `APPLE_CLIENT_ID` — Optional OAuth credentials to enable Google and Apple sign-in.

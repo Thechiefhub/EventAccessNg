@@ -71,14 +71,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
               : "max-w-5xl px-5 sm:px-6 py-2.5 bg-[#0A0A0A]/75 border border-[#F5F0E6]/10"
           }`}
         >
-          {/* Left: Wordmark with subtle lime dot */}
+          {/* Left: CHECKING Wordmark in Cabinet Grotesk 800 uppercase + pulsing lime dot */}
           <Link
             to="/"
-            className="myevent-focus flex items-center gap-1.5 font-cabinet font-extrabold text-xl sm:text-2xl tracking-tight text-[#F5F0E6] whitespace-nowrap shrink-0 rounded-full px-1"
+            className="checking-focus flex items-center gap-1.5 font-cabinet font-extrabold text-xl sm:text-2xl uppercase tracking-[-0.03em] text-[#F5F0E6] whitespace-nowrap shrink-0 rounded-full px-1"
           >
-            <span>Myevent</span>
+            <span>CHECKING</span>
             <span
-              className="inline-block w-2 h-2 rounded-full bg-[#C8FF00] translate-y-[2px]"
+              className="checking-dot-pulse inline-block w-2 h-2 rounded-full bg-[#C8FF00] translate-y-[1px]"
               aria-hidden="true"
             />
           </Link>
@@ -90,7 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
                 key={item.label}
                 href={item.href}
                 onClick={(e) => handleLinkClick(e, item.href, item.isModal)}
-                className="myevent-focus nav-underline font-satoshi font-medium text-sm text-[#F5F0E6]/85 hover:text-[#F5F0E6] transition-colors whitespace-nowrap shrink-0 py-1"
+                className="checking-focus nav-underline font-satoshi font-medium text-sm text-[#F5F0E6]/85 hover:text-[#F5F0E6] transition-colors whitespace-nowrap shrink-0 py-1"
               >
                 {item.label}
               </a>
@@ -100,15 +100,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
           {/* Right: Actions + Mobile Hamburger */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
-              to="/auth"
-              className="myevent-focus hidden sm:inline-flex items-center justify-center font-satoshi font-medium text-sm text-[#F5F0E6]/85 hover:text-[#F5F0E6] px-3.5 py-2 min-h-[40px] rounded-full transition-colors whitespace-nowrap shrink-0"
+              to="/signin"
+              className="checking-focus hidden sm:inline-flex items-center justify-center font-satoshi font-medium text-sm text-[#F5F0E6]/85 hover:text-[#F5F0E6] px-3.5 py-2 min-h-[40px] rounded-full transition-colors whitespace-nowrap shrink-0"
             >
               Log in
             </Link>
 
             <Link
-              to="/auth"
-              className="myevent-focus group inline-flex items-center justify-center gap-1.5 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-sm px-4 sm:px-5 py-2.5 min-h-[42px] rounded-full hover:scale-[1.03] hover:shadow-[0_0_24px_rgba(200,255,0,0.45)] transition-all duration-150 whitespace-nowrap shrink-0"
+              to="/signup"
+              className="checking-focus group inline-flex items-center justify-center gap-1.5 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-sm px-4 sm:px-5 py-2.5 min-h-[42px] rounded-full hover:scale-[1.03] hover:shadow-[0_0_24px_rgba(200,255,0,0.45)] transition-all duration-150 whitespace-nowrap shrink-0"
             >
               <span>Start Free</span>
               <ArrowRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" />
@@ -119,7 +119,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
               onClick={() => setMobileOpen((prev) => !prev)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
-              className="myevent-focus md:hidden inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#F5F0E6]/15 text-[#F5F0E6] hover:border-[#C8FF00] transition-colors"
+              className="checking-focus md:hidden inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#F5F0E6]/15 text-[#F5F0E6] hover:border-[#C8FF00] transition-colors"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -161,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
                     delay: prefersReducedMotion ? 0 : idx * 0.06,
                     ease: [0.16, 1, 0.3, 1],
                   }}
-                  className="myevent-focus font-clash font-bold text-5xl sm:text-6xl tracking-tight text-[#F5F0E6] hover:text-[#C8FF00] transition-colors py-1"
+                  className="checking-focus font-clash font-bold text-5xl sm:text-6xl tracking-tight text-[#F5F0E6] hover:text-[#C8FF00] transition-colors py-1"
                 >
                   {item.label}
                 </motion.a>
@@ -175,16 +175,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPricing }) => {
               className="relative z-10 flex flex-col gap-3 pt-8 border-t border-[#F5F0E6]/15"
             >
               <Link
-                to="/auth"
+                to="/signup"
                 onClick={() => setMobileOpen(false)}
-                className="myevent-focus w-full inline-flex items-center justify-center gap-2 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-base min-h-[52px] rounded-full"
+                className="checking-focus w-full inline-flex items-center justify-center gap-2 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-base min-h-[52px] rounded-full"
               >
                 Start planning free <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
-                to="/auth"
+                to="/signin"
                 onClick={() => setMobileOpen(false)}
-                className="myevent-focus w-full inline-flex items-center justify-center border border-[#F5F0E6]/25 text-[#F5F0E6] font-satoshi font-medium text-base min-h-[52px] rounded-full"
+                className="checking-focus w-full inline-flex items-center justify-center border border-[#F5F0E6]/25 text-[#F5F0E6] font-satoshi font-medium text-base min-h-[52px] rounded-full"
               >
                 Log in to workspace
               </Link>

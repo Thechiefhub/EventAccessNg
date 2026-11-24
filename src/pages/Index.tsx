@@ -23,7 +23,7 @@ const Index = () => {
 
   // Respect prefers-color-scheme on initial load if user explicitly saved a choice
   useEffect(() => {
-    const saved = window.localStorage.getItem("myevent-homepage-theme");
+    const saved = window.localStorage.getItem("checking-homepage-theme");
     if (saved === "light" || saved === "dark") {
       setTheme(saved);
     }
@@ -32,14 +32,14 @@ const Index = () => {
   const toggleTheme = () => {
     setTheme((prev) => {
       const next = prev === "dark" ? "light" : "dark";
-      window.localStorage.setItem("myevent-homepage-theme", next);
+      window.localStorage.setItem("checking-homepage-theme", next);
       return next;
     });
   };
 
   return (
     <div
-      data-myevent-theme={theme}
+      data-checking-theme={theme}
       className="relative min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-satoshi antialiased selection:bg-[#C8FF00] selection:text-[#0A0A0A]"
     >
       {/* 1% Editorial grain texture overlay across the entire homepage */}
@@ -75,7 +75,7 @@ const Index = () => {
         <FinalCTA onOpenDemo={() => setDemoOpen(true)} />
       </main>
 
-      {/* Section 8b — Editorial Dark Footer with MYEVENT Watermark */}
+      {/* Section 8b — Editorial Dark Footer with CHECKING Watermark */}
       <Footer
         theme={theme}
         onToggleTheme={toggleTheme}

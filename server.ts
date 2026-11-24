@@ -2,12 +2,15 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
+import { authRouter } from "./server/auth";
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.set("trust proxy", 1);
+  app.use(express.json({ limit: "1mb" }));
+  app.use("/api/auth", authRouter);
 
   // API Route: AI Event Agenda Generator
   app.post("/api/generate-agenda", async (req, res) => {

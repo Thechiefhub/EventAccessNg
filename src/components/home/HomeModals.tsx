@@ -105,7 +105,7 @@ export const TourModal: React.FC<{ open: boolean; onClose: () => void }> = ({
             type="button"
             onClick={onClose}
             aria-label="Close tour"
-            className="myevent-focus inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/15 hover:bg-black/25 transition-colors"
+            className="checking-focus inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/15 hover:bg-black/25 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -131,7 +131,7 @@ export const TourModal: React.FC<{ open: boolean; onClose: () => void }> = ({
                 type="button"
                 onClick={() => setIdx(i)}
                 aria-label={`Jump to ${s.name}`}
-                className="myevent-focus group py-2 text-left"
+                className="checking-focus group py-2 text-left"
               >
                 <div
                   className="h-1.5 rounded-full transition-colors"
@@ -157,7 +157,7 @@ export const TourModal: React.FC<{ open: boolean; onClose: () => void }> = ({
                 type="button"
                 onClick={() => setIdx((prev) => (prev === 0 ? tourSlides.length - 1 : prev - 1))}
                 aria-label="Previous step"
-                className="myevent-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#262626] hover:border-[#C8FF00] text-[#F5F0E6]"
+                className="checking-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#262626] hover:border-[#C8FF00] text-[#F5F0E6]"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -165,16 +165,16 @@ export const TourModal: React.FC<{ open: boolean; onClose: () => void }> = ({
                 type="button"
                 onClick={() => setIdx((prev) => (prev + 1) % tourSlides.length)}
                 aria-label="Next step"
-                className="myevent-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#262626] hover:border-[#C8FF00] text-[#F5F0E6]"
+                className="checking-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#262626] hover:border-[#C8FF00] text-[#F5F0E6]"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
 
             <Link
-              to="/auth"
+              to="/signup"
               onClick={onClose}
-              className="myevent-focus inline-flex items-center gap-2 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-sm px-6 py-3 min-h-[44px] rounded-full hover:scale-[1.03] transition-transform"
+              className="checking-focus inline-flex items-center gap-2 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-sm px-6 py-3 min-h-[44px] rounded-full hover:scale-[1.03] transition-transform"
             >
               <span>Try it free now</span>
               <ArrowRight className="w-4 h-4" />
@@ -239,7 +239,7 @@ export const PricingModal: React.FC<{
                   key={c}
                   type="button"
                   onClick={() => setCurrency(c)}
-                  className={`myevent-focus px-3 py-1.5 rounded-full font-satoshi text-xs font-bold transition-colors ${
+                  className={`checking-focus px-3 py-1.5 rounded-full font-satoshi text-xs font-bold transition-colors ${
                     currency === c
                       ? "bg-[#C8FF00] text-[#0A0A0A]"
                       : "text-[#A1A1A1] hover:text-[#F5F0E6]"
@@ -253,7 +253,7 @@ export const PricingModal: React.FC<{
               type="button"
               onClick={onClose}
               aria-label="Close pricing"
-              className="myevent-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#262626] hover:border-[#C8FF00]"
+              className="checking-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#262626] hover:border-[#C8FF00]"
             >
               <X className="w-5 h-5" />
             </button>
@@ -284,9 +284,9 @@ export const PricingModal: React.FC<{
               </ul>
             </div>
             <Link
-              to="/auth"
+              to="/signup"
               onClick={onClose}
-              className="myevent-focus mt-7 inline-flex items-center justify-center border border-[#F5F0E6]/30 hover:border-[#C8FF00] font-satoshi font-bold text-sm min-h-[44px] rounded-full transition-colors"
+              className="checking-focus mt-7 inline-flex items-center justify-center border border-[#F5F0E6]/30 hover:border-[#C8FF00] font-satoshi font-bold text-sm min-h-[44px] rounded-full transition-colors"
             >
               Start Free
             </Link>
@@ -323,9 +323,9 @@ export const PricingModal: React.FC<{
               </ul>
             </div>
             <Link
-              to="/auth"
+              to="/signup"
               onClick={onClose}
-              className="myevent-focus mt-7 inline-flex items-center justify-center gap-1.5 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-sm min-h-[44px] rounded-full hover:scale-[1.02] transition-transform"
+              className="checking-focus mt-7 inline-flex items-center justify-center gap-1.5 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-sm min-h-[44px] rounded-full hover:scale-[1.02] transition-transform"
             >
               <span>Launch with Pro</span>
               <ArrowRight className="w-4 h-4" />
@@ -363,7 +363,7 @@ export const PricingModal: React.FC<{
                 onClose();
                 onBookDemo();
               }}
-              className="myevent-focus mt-7 inline-flex items-center justify-center border border-[#F5F0E6]/30 hover:border-[#C8FF00] font-satoshi font-bold text-sm min-h-[44px] rounded-full transition-colors"
+              className="checking-focus mt-7 inline-flex items-center justify-center border border-[#F5F0E6]/30 hover:border-[#C8FF00] font-satoshi font-bold text-sm min-h-[44px] rounded-full transition-colors"
             >
               Book a Demo
             </button>
@@ -434,7 +434,7 @@ export const DemoModal: React.FC<{ open: boolean; onClose: () => void }> = ({
             type="button"
             onClick={resetAndClose}
             aria-label="Close demo dialog"
-            className="myevent-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#262626] hover:border-[#C8FF00]"
+            className="checking-focus inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#262626] hover:border-[#C8FF00]"
           >
             <X className="w-5 h-5" />
           </button>
@@ -453,9 +453,9 @@ export const DemoModal: React.FC<{ open: boolean; onClose: () => void }> = ({
             <button
               type="button"
               onClick={resetAndClose}
-              className="myevent-focus mt-3 inline-flex items-center justify-center bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-sm px-6 py-3 min-h-[44px] rounded-full"
+              className="checking-focus mt-3 inline-flex items-center justify-center bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-sm px-6 py-3 min-h-[44px] rounded-full"
             >
-              Back to Myevent
+              Back to Checking
             </button>
           </div>
         ) : (
@@ -471,7 +471,7 @@ export const DemoModal: React.FC<{ open: boolean; onClose: () => void }> = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Amara Okafor"
-                className="myevent-focus w-full rounded-xl border border-[#262626] bg-[#141414] px-4 py-3 font-satoshi text-base text-[#F5F0E6] placeholder:text-[#A1A1A1]/50"
+                className="checking-focus w-full rounded-xl border border-[#262626] bg-[#141414] px-4 py-3 font-satoshi text-base text-[#F5F0E6] placeholder:text-[#A1A1A1]/50"
               />
             </div>
 
@@ -486,7 +486,7 @@ export const DemoModal: React.FC<{ open: boolean; onClose: () => void }> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="amara@africatechsummit.com"
-                className="myevent-focus w-full rounded-xl border border-[#262626] bg-[#141414] px-4 py-3 font-satoshi text-base text-[#F5F0E6] placeholder:text-[#A1A1A1]/50"
+                className="checking-focus w-full rounded-xl border border-[#262626] bg-[#141414] px-4 py-3 font-satoshi text-base text-[#F5F0E6] placeholder:text-[#A1A1A1]/50"
               />
             </div>
 
@@ -500,7 +500,7 @@ export const DemoModal: React.FC<{ open: boolean; onClose: () => void }> = ({
                   type="text"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="myevent-focus w-full rounded-xl border border-[#262626] bg-[#141414] px-4 py-3 font-satoshi text-base text-[#F5F0E6]"
+                  className="checking-focus w-full rounded-xl border border-[#262626] bg-[#141414] px-4 py-3 font-satoshi text-base text-[#F5F0E6]"
                 />
               </div>
               <div>
@@ -511,7 +511,7 @@ export const DemoModal: React.FC<{ open: boolean; onClose: () => void }> = ({
                   id="demo-size"
                   value={eventSize}
                   onChange={(e) => setEventSize(e.target.value)}
-                  className="myevent-focus w-full rounded-xl border border-[#262626] bg-[#141414] px-4 py-3 font-satoshi text-base text-[#F5F0E6]"
+                  className="checking-focus w-full rounded-xl border border-[#262626] bg-[#141414] px-4 py-3 font-satoshi text-base text-[#F5F0E6]"
                 >
                   <option>Under 500 attendees</option>
                   <option>500 – 2,000 attendees</option>
@@ -523,7 +523,7 @@ export const DemoModal: React.FC<{ open: boolean; onClose: () => void }> = ({
 
             <button
               type="submit"
-              className="myevent-focus w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-base min-h-[52px] rounded-full hover:scale-[1.01] transition-transform"
+              className="checking-focus w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-base min-h-[52px] rounded-full hover:scale-[1.01] transition-transform"
             >
               <span>Request Live Demo</span>
               <ArrowRight className="w-5 h-5" />

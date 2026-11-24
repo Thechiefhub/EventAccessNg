@@ -7,6 +7,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
+import CheckEmail from "./pages/CheckEmail";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 import NotFound from "./pages/NotFound";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
@@ -20,7 +26,6 @@ import NarrativeStudioPage from "./pages/NarrativeStudioPage";
 import AcceptInvite from "./pages/AcceptInvite";
 import CertificateLookup from "./pages/CertificateLookup";
 import AdminPage from "./pages/AdminPage";
-import ResetPassword from "./pages/ResetPassword";
 import RegistrationModule from "./pages/RegistrationModule";
 import PublicRegistration from "./pages/PublicRegistration";
 import QRScannerPage from "./pages/QRScannerPage";
@@ -37,7 +42,12 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/check-email" element={<CheckEmail />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/invite/:token" element={<AcceptInvite />} />
             <Route path="/certificate" element={<CertificateLookup />} />
             <Route path="/r/:slug" element={<PublicRegistration />} />

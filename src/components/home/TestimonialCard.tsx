@@ -79,7 +79,7 @@ const proofStats = [
 const testimonials: TestimonialCardProps[] = [
   {
     quote:
-      "We stopped using five tools. Myevent is now our whole back office — from sponsor pitch decks to the final QR scan at the gate.",
+      "We stopped using five tools. Checking is now our whole back office — from sponsor pitch decks to the final QR scan at the gate.",
     name: "Tunde Adeyemi",
     role: "Co-Founder",
     eventName: "Lagos Builders Summit",

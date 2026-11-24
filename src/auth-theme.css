@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Checking Auth Theme Tokens — Extends src/theme.css
+   Editorial brutalism meets Afro-futurist neon for Sign Up / Sign In / Reset
+   ========================================================================== */
+
+:root {
+  --auth-card-bg: #141414;
+  --auth-card-bg-light: #FFFFFF;
+  --auth-input-bg: #0F0F0F;
+  --auth-error: #FF5C5C;
+  --auth-success: #C8FF00;
+  --auth-shadow: 0 24px 80px rgba(200, 255, 0, 0.08);
+}
+
+/* Auth input base & focus/error/success rings */
+.auth-input {
+  background-color: var(--auth-input-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  min-height: 48px;
+  font-family: var(--font-satoshi);
+  font-size: 16px;
+  color: var(--text-primary);
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.auth-input::placeholder {
+  color: rgba(161, 161, 161, 0.58);
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--accent-lime);
+  border-width: 2px;
+  box-shadow: 0 0 0 4px rgba(200, 255, 0, 0.15);
+}
+
+.auth-input-error {
+  border-color: var(--auth-error) !important;
+  border-width: 2px !important;
+}
+
+.auth-input-error:focus {
+  box-shadow: 0 0 0 4px rgba(255, 92, 92, 0.18) !important;
+}
+
+.auth-input-success {
+  border-color: var(--auth-success) !important;
+  border-width: 2px !important;
+}
+
+/* One-time subtle 4px error shake (250ms) */
+@keyframes authCardShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  45% { transform: translateX(4px); }
+  70% { transform: translateX(-3px); }
+  85% { transform: translateX(2px); }
+}
+
+.auth-shake {
+  animation: authCardShake 250ms ease-in-out;
+}
+
+/* Tiny eye toggle blink micro-interaction */
+@keyframes eyeBlink {
+  0%, 100% { transform: scaleY(1); }
+  45% { transform: scaleY(0.15); }
+}
+
+.auth-eye-blink {
+  animation: eyeBlink 180ms ease-in-out;
+}
+
+/* Lime-glow strength meter segment */
+.strength-segment-glow {
+  box-shadow: 0 0 12px rgba(200, 255, 0, 0.7);
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .auth-shake,
+  .auth-eye-blink {
+    animation: none !important;
+  }
+}

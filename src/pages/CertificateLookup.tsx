@@ -283,7 +283,7 @@ export default function CertificateLookup() {
       {/* Footer */}
       <footer className="border-t border-border py-4 text-center">
         <p className="text-xs text-muted-foreground">
-          Powered by <Link to="/" className="text-primary hover:underline font-medium">Myevent</Link>
+          Powered by <Link to="/" className="text-primary hover:underline font-medium">Checking</Link>
         </p>
       </footer>
     </div>

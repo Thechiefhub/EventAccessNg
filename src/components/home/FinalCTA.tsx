@@ -29,8 +29,8 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenDemo }) => {
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              to="/auth"
-              className="myevent-focus group inline-flex items-center justify-center gap-2.5 bg-[#C8FF00] text-[#0A0A0A] border-2 border-[#0A0A0A] font-satoshi font-bold text-base sm:text-lg px-9 py-4 min-h-[56px] rounded-full hover:scale-[1.03] hover:shadow-[4px_4px_0px_#0A0A0A] transition-all duration-150 w-full sm:w-auto whitespace-nowrap"
+              to="/signup"
+              className="checking-focus group inline-flex items-center justify-center gap-2.5 bg-[#C8FF00] text-[#0A0A0A] border-2 border-[#0A0A0A] font-satoshi font-bold text-base sm:text-lg px-9 py-4 min-h-[56px] rounded-full hover:scale-[1.03] hover:shadow-[4px_4px_0px_#0A0A0A] transition-all duration-150 w-full sm:w-auto whitespace-nowrap"
             >
               <span>Start free</span>
               <ArrowRight className="w-5 h-5 transition-transform duration-150 group-hover:translate-x-1" />
@@ -39,7 +39,7 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onOpenDemo }) => {
             <button
               type="button"
               onClick={onOpenDemo}
-              className="myevent-focus inline-flex items-center justify-center gap-2 border-2 border-[var(--contrast-on-secondary)] bg-transparent hover:bg-[var(--contrast-on-secondary)] hover:text-[var(--contrast-on-secondary-inv)] text-[var(--contrast-on-secondary)] font-satoshi font-bold text-base sm:text-lg px-8 py-4 min-h-[56px] rounded-full hover:scale-[1.02] transition-all duration-150 w-full sm:w-auto whitespace-nowrap"
+              className="checking-focus inline-flex items-center justify-center gap-2 border-2 border-[var(--contrast-on-secondary)] bg-transparent hover:bg-[var(--contrast-on-secondary)] hover:text-[var(--contrast-on-secondary-inv)] text-[var(--contrast-on-secondary)] font-satoshi font-bold text-base sm:text-lg px-8 py-4 min-h-[56px] rounded-full hover:scale-[1.02] transition-all duration-150 w-full sm:w-auto whitespace-nowrap"
             >
               <Calendar className="w-4 h-4" />
               <span>Book a demo</span>

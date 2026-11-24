@@ -47,10 +47,14 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="font-display text-xs uppercase tracking-wider">
+          <SidebarGroupLabel className="font-cabinet text-sm font-extrabold uppercase tracking-[-0.02em]">
             {!collapsed && (
-              <span>
-                My<span className="text-sidebar-primary">event</span>
+              <span className="inline-flex items-center gap-1.5 text-sidebar-foreground">
+                <span>CHECKING</span>
+                <span
+                  className="checking-dot-pulse inline-block w-2 h-2 rounded-full bg-[#C8FF00]"
+                  aria-hidden="true"
+                />
               </span>
             )}
           </SidebarGroupLabel>

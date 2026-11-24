@@ -178,7 +178,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTour }) => {
               transition={{ duration: 0.5, delay: prefersReducedMotion ? 0 : 0.36 }}
               className="mt-7 font-satoshi text-[18px] sm:text-[20px] md:text-[21px] leading-[1.55] text-[var(--text-muted)] max-w-[540px]"
             >
-              From the first idea to the last check-in — Myevent is the AI co-pilot for
+              From the first idea to the last check-in — Checking is the AI co-pilot for
               African conferences, summits and award nights.{" "}
               <span className="text-[var(--text-primary)] font-medium">
                 Name it. Fund it. Hype it. Run it.
@@ -193,8 +193,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTour }) => {
               className="mt-9 flex flex-wrap items-center gap-4 w-full sm:w-auto"
             >
               <Link
-                to="/auth"
-                className="myevent-focus group inline-flex items-center justify-center gap-2.5 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-base px-7 py-4 min-h-[54px] rounded-full hover:scale-[1.03] hover:shadow-[0_0_36px_rgba(200,255,0,0.45)] transition-all duration-150 whitespace-nowrap w-full sm:w-auto"
+                to="/signup"
+                className="checking-focus group inline-flex items-center justify-center gap-2.5 bg-[#C8FF00] text-[#0A0A0A] font-satoshi font-bold text-base px-7 py-4 min-h-[54px] rounded-full hover:scale-[1.03] hover:shadow-[0_0_36px_rgba(200,255,0,0.45)] transition-all duration-150 whitespace-nowrap w-full sm:w-auto"
               >
                 <span>Start planning free</span>
                 <ArrowRight className="w-5 h-5 transition-transform duration-150 group-hover:translate-x-1" />
@@ -203,7 +203,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTour }) => {
               <button
                 type="button"
                 onClick={onOpenTour}
-                className="myevent-focus group inline-flex items-center justify-center gap-3 border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 hover:border-[var(--accent-on-primary)] text-[var(--text-primary)] font-satoshi font-medium text-base px-6 py-4 min-h-[54px] rounded-full hover:scale-[1.02] transition-all duration-150 whitespace-nowrap w-full sm:w-auto"
+                className="checking-focus group inline-flex items-center justify-center gap-3 border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/60 hover:border-[var(--accent-on-primary)] text-[var(--text-primary)] font-satoshi font-medium text-base px-6 py-4 min-h-[54px] rounded-full hover:scale-[1.02] transition-all duration-150 whitespace-nowrap w-full sm:w-auto"
               >
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--accent-on-primary-soft)] text-[var(--accent-on-primary)] group-hover:bg-[#C8FF00] group-hover:text-[#0A0A0A] transition-colors">
                   <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
@@ -241,7 +241,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTour }) => {
               onMouseLeave={() => setStackSpread(false)}
               onClick={() => setStackSpread((s) => !s)}
               role="region"
-              aria-label="Interactive preview stack of Myevent's four modules"
+              aria-label="Interactive preview stack of Checking's four modules"
               className="relative w-full max-w-[390px] sm:max-w-[430px] h-[410px] sm:h-[460px] flex items-center justify-center cursor-pointer select-none"
             >
               {stackCards.map((card, idx) => {
@@ -320,7 +320,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTour }) => {
             <button
               type="button"
               onClick={scrollToModules}
-              className="myevent-focus mt-6 font-satoshi text-xs font-medium text-[var(--text-muted)] hover:text-[var(--accent-on-primary)] transition-colors inline-flex items-center gap-1.5"
+              className="checking-focus mt-6 font-satoshi text-xs font-medium text-[var(--text-muted)] hover:text-[var(--accent-on-primary)] transition-colors inline-flex items-center gap-1.5"
             >
               <span>Hover or tap stack to fan out · Explore all 4 modules</span>
               <ArrowRight className="w-3.5 h-3.5" />

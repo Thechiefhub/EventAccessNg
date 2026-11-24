@@ -1,7 +1,7 @@
 
-# EventPadi → Sophistication Roadmap
+# Checking → Sophistication Roadmap
 
-Goal: make organizers switch from Eventbrite / Hubilo / Luma to **EventPadi** by combining Africa-native payments + logistics, AI everywhere, marketplace discovery, and enterprise polish — across conferences, festivals, hybrid events, and paid trainings.
+Goal: make organizers switch from Eventbrite / Hubilo / Luma to **Checking** by combining Africa-native payments + logistics, AI everywhere, marketplace discovery, and enterprise polish — across conferences, festivals, hybrid events, and paid trainings.
 
 What's already strong today (don't rebuild): Spark, Chase, Buzz, Engine, D-Day, public registration with tiers, QR check-in, badge sharing, announcements, AI content + perks, e-certificates, team invites, super-admin stats.
 
@@ -21,7 +21,7 @@ These close the biggest gaps that organizers immediately notice when comparing t
 
 2. **Event website builder (no-code)**
    - Drag-free block editor on top of the current registration page: Hero, About, Agenda, Speakers, Sponsors, Venue map, FAQ, Gallery, Countdown, Testimonials, Sign-up.
-   - Themes (3–5 African-aesthetic presets), custom subdomain (`yourevent.eventpadi.com`) + custom domain.
+   - Themes (3–5 African-aesthetic presets), custom subdomain (`yourevent.checking.com`) + custom domain.
    - SEO: per-event meta, OG image auto-rendered from flyer + title, JSON-LD `Event` schema, sitemap.
 
 3. **Agenda / Sessions / Speakers module**
@@ -45,7 +45,7 @@ These close the biggest gaps that organizers immediately notice when comparing t
 
 Where you start to feel different from incumbents.
 
-6. **Public event discovery marketplace** (`eventpadi.com/discover`)
+6. **Public event discovery marketplace** (`checking.com/discover`)
    - Browse by city, country, category, date, free/paid.
    - SEO landing pages per city ("Events in Lagos this weekend") — drives free traffic to every organizer.
    - "Featured" slot (monetizable later).
@@ -97,7 +97,7 @@ What unlocks brands, agencies, governments, universities.
 
 14. **White-label & custom domain**
     - Bring-your-own-domain on the event site, attendee app, and emails.
-    - Custom logo, colors, favicon, splash; remove EventPadi badge on Pro+.
+    - Custom logo, colors, favicon, splash; remove Checking badge on Pro+.
 
 15. **Advanced analytics & exports**
     - Funnel (visit → reg start → reg complete → paid → checked in).
@@ -155,10 +155,10 @@ Phase 4 (Enterprise)
 
 ---
 
-## Benchmark — EventPadi vs incumbents
+## Benchmark — Checking vs incumbents
 
 ```text
-Capability                       Eventbrite  Luma   Hubilo  Bizzabo   EventPadi today  EventPadi after roadmap
+Capability                       Eventbrite  Luma   Hubilo  Bizzabo   Checking today  Checking after roadmap
 Paid ticketing (cards)              ✅        ✅      ✅      ✅          ❌                ✅ (P0-1)
 Africa local pay (MoMo/M-Pesa)      ⚠️ (few)  ❌      ❌      ❌          ❌                ✅ (P0-1)  ← MOAT
 Multi-currency + payouts            ✅        ⚠️      ✅      ✅          ❌                ✅ (P0-5)
@@ -190,6 +190,6 @@ Net read: shipping **Phase 1 + Phase 2** alone closes the table to parity with L
 
 ## What I'd recommend we start building first
 
-If you approve this plan, the highest-ROI first build is **Phase 1, item #1: Paid ticketing with Paystack + Flutterwave + M-Pesa + MoMo** on the existing public registration page, with the payouts dashboard (item #5). That single shipment turns EventPadi from a free-event tool into a revenue platform for both organizers and you — and unlocks every later module.
+If you approve this plan, the highest-ROI first build is **Phase 1, item #1: Paid ticketing with Paystack + Flutterwave + M-Pesa + MoMo** on the existing public registration page, with the payouts dashboard (item #5). That single shipment turns Checking from a free-event tool into a revenue platform for both organizers and you — and unlocks every later module.
 
 Want me to draft the Phase 1 build plan next?
