@@ -18,6 +18,7 @@ interface AuthContextType {
   authToken: string | null;
   loading: boolean;
   setCheckingSession: (user: CheckingAccountUser, token?: string | null) => void;
+  setSupabaseSession: (session: Session | null) => void;
   signOut: () => Promise<void>;
 }
 
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   authToken: null,
   loading: true,
   setCheckingSession: () => {},
+  setSupabaseSession: () => {},
   signOut: async () => {},
 });
 
@@ -57,9 +59,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (!mounted) return;
 
-        if (sbRes.status === "fulfilled") {
+        if (sbRes.status === "fulfilled" && sbRes.value.data.session) {
           setSession(sbRes.value.data.session);
-          setSupabaseUser(sbRes.value.data.session?.user ?? null);
+          setSupabaseUser(sbRes.value.data.session.user ?? null);
         }
         if (apiRes.status === "fulfilled" && apiRes.value?.user) {
           setCheckingUser(apiRes.value.user);
@@ -88,6 +90,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const setSupabaseSession = useCallback((nextSession: Session | null) => {
+    setSession(nextSession);
+    setSupabaseUser(nextSession?.user ?? null);
+    setLoading(false);
+  }, []);
+
   const signOut = useCallback(async () => {
     setCheckingUser(null);
     setAuthToken(null);
@@ -105,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, authToken, loading, setCheckingSession, signOut }}
+      value={{ user, session, authToken, loading, setCheckingSession, setSupabaseSession, signOut }}
     >
       {children}
     </AuthContext.Provider>

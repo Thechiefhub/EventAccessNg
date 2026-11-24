@@ -13,11 +13,25 @@ import {
   showCheckingToast,
 } from "@/components/auth";
 
+const AUTH_ROUTES = ["/signin", "/signup", "/auth", "/forgot-password", "/check-email", "/reset-password", "/verify-email"];
+
+function getSafeRedirectTarget(returnTo: string | null): string {
+  if (
+    returnTo &&
+    returnTo.startsWith("/") &&
+    !returnTo.startsWith("//") &&
+    !AUTH_ROUTES.some((route) => returnTo === route || returnTo.startsWith(`${route}?`))
+  ) {
+    return returnTo;
+  }
+  return "/dashboard";
+}
+
 export default function SignIn() {
-  const { user, loading, setCheckingSession } = useAuth();
+  const { user, loading, setCheckingSession, setSupabaseSession } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const returnTo = searchParams.get("returnTo");
+  const targetRoute = getSafeRedirectTarget(searchParams.get("returnTo"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +43,7 @@ export default function SignIn() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && user) {
-    return <Navigate to={returnTo || "/dashboard"} replace />;
+    return <Navigate to={targetRoute} replace />;
   }
 
   const handleSocialAuth = async (provider: "google" | "apple") => {
@@ -71,49 +85,63 @@ export default function SignIn() {
 
     setSubmitting(true);
     try {
+      const normalizedEmail = email.trim();
+
       // 1. Authenticate against Checking backend (/api/auth/signin)
-      const res = await fetch("/api/auth/signin", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "CheckingAuth",
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-          rememberMe,
-        }),
-      });
+      try {
+        const res = await fetch("/api/auth/signin", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "CheckingAuth",
+          },
+          body: JSON.stringify({
+            email: normalizedEmail,
+            password,
+            rememberMe,
+          }),
+        });
 
-      const data = await res.json();
+        const data = await res.json().catch(() => ({}));
 
-      if (res.ok && data.user) {
-        setCheckingSession(data.user, data.token);
-        showCheckingToast("Welcome back to Checking.", "success");
-        navigate(returnTo || "/dashboard", { replace: true });
-        return;
+        if (res.ok && data.user) {
+          setCheckingSession(data.user, data.token);
+          // Also hydrate Supabase session if the user has an existing Supabase account
+          supabase.auth
+            .signInWithPassword({ email: normalizedEmail, password })
+            .then(({ data: sbData }) => {
+              if (sbData?.session) setSupabaseSession(sbData.session);
+            })
+            .catch(() => {});
+          showCheckingToast("Welcome back to Checking.", "success");
+          navigate(targetRoute, { replace: true });
+          return;
+        }
+
+        if (res.status === 429 || data.rateLimited) {
+          setFailedAttempts(5);
+          setFormError(
+            data.error || "Too many attempts. Please wait 5 minutes or reset your password."
+          );
+          setHasFieldError(true);
+          setShakeKey((k) => k + 1);
+          return;
+        }
+      } catch {
+        // Fall through cleanly to Supabase sign-in
       }
 
-      if (res.status === 429 || data.rateLimited) {
-        setFailedAttempts(5);
-        setFormError(
-          data.error || "Too many attempts. Please wait 5 minutes or reset your password."
-        );
-        setHasFieldError(true);
-        setShakeKey((k) => k + 1);
-        return;
-      }
-
-      // 2. Fallback check for pre-existing Supabase accounts
+      // 2. Authenticate against Supabase Auth for existing accounts
       const { data: sbData, error: sbError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: normalizedEmail,
         password,
       });
 
       if (!sbError && sbData.session) {
+        setSupabaseSession(sbData.session);
         showCheckingToast("Welcome back to Checking.", "success");
-        navigate(returnTo || "/dashboard", { replace: true });
+        navigate(targetRoute, { replace: true });
         return;
       }
 

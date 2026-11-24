@@ -17,11 +17,25 @@ import {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+const AUTH_ROUTES = ["/signin", "/signup", "/auth", "/forgot-password", "/check-email", "/reset-password", "/verify-email"];
+
+function getSafeRedirectTarget(returnTo: string | null): string {
+  if (
+    returnTo &&
+    returnTo.startsWith("/") &&
+    !returnTo.startsWith("//") &&
+    !AUTH_ROUTES.some((route) => returnTo === route || returnTo.startsWith(`${route}?`))
+  ) {
+    return returnTo;
+  }
+  return "/dashboard";
+}
+
 export default function SignUp() {
-  const { user, loading, setCheckingSession } = useAuth();
+  const { user, loading, setCheckingSession, setSupabaseSession } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const returnTo = searchParams.get("returnTo");
+  const targetRoute = getSafeRedirectTarget(searchParams.get("returnTo"));
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -38,7 +52,7 @@ export default function SignUp() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && user) {
-    return <Navigate to={returnTo || "/dashboard"} replace />;
+    return <Navigate to={targetRoute} replace />;
   }
 
   const validateField = (field: string, value: string): string => {
@@ -104,6 +118,9 @@ export default function SignUp() {
 
     setSubmitting(true);
     try {
+      const trimmedName = name.trim();
+      const trimmedEmail = email.trim();
+
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         credentials: "include",
@@ -112,8 +129,8 @@ export default function SignUp() {
           "X-Requested-With": "CheckingAuth",
         },
         body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
+          name: trimmedName,
+          email: trimmedEmail,
           password,
           country,
           role,
@@ -121,7 +138,7 @@ export default function SignUp() {
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         if (data.field) {
           setFieldErrors((prev) => ({ ...prev, [data.field]: data.error }));
@@ -132,32 +149,34 @@ export default function SignUp() {
         return;
       }
 
-      // Opportunistically mirror signup into Supabase Auth if configured
-      supabase.auth
-        .signUp({
-          email: email.trim(),
-          password,
-          options: {
-            data: { full_name: name.trim(), country, organiser_role: role },
-          },
-        })
-        .catch(() => {});
-
-      if (data.requiresVerification) {
-        navigate(`/check-email?verify=true&email=${encodeURIComponent(email.trim())}`);
-        return;
-      }
-
+      // Sync Checking session immediately so ProtectedRoute grants instant dashboard access
       if (data.user) {
         setCheckingSession(data.user, data.token);
       }
+
+      // Opportunistically mirror signup into Supabase Auth so workspace DB queries have a session
+      supabase.auth
+        .signUp({
+          email: trimmedEmail,
+          password,
+          options: {
+            data: { full_name: trimmedName, country, organiser_role: role },
+          },
+        })
+        .then(({ data: sbData }) => {
+          if (sbData?.session) {
+            setSupabaseSession(sbData.session);
+          }
+        })
+        .catch(() => {});
+
       try {
         window.sessionStorage.setItem("checking_welcome_confetti", "1");
       } catch {
         // Ignore storage errors
       }
       showCheckingToast("Account created! Welcome to Checking.", "success");
-      navigate(returnTo || "/dashboard", { replace: true });
+      navigate(targetRoute, { replace: true });
     } catch {
       setFormError("Something went wrong. Please check your connection and try again.");
       setShakeKey((k) => k + 1);
